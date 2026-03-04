@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia — исторический тренажер</title>
+    
+    <!-- Шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Основной стиль -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-scroll"></i>
+                <span>Historia</span>
+            </div>
+            
+            <div class="nav-links">
+                <button class="nav-btn active" data-section="timeline">
+                    <i class="fas fa-stream"></i>
+                    <span>Лента времени</span>
+                </button>
+                <button class="nav-btn" data-section="training">
+                    <i class="fas fa-dumbbell"></i>
+                    <span>Тренировка</span>
+                </button>
+                <button class="nav-btn" data-section="statistics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Статистика</span>
+                </button>
+            </div>
+            
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <!-- Лента времени -->
+        <section id="timeline" class="section active">
+            <div class="section-header">
+                <h1><i class="fas fa-stream"></i> Лента времени</h1>
+                <p>Изучайте исторические события в хронологическом порядке</p>
+            </div>
+            
+            <div class="timeline-filters-panel">
+                <div class="filters-header">
+                    <h3><i class="fas fa-filter"></i> Фильтры</h3>
+                    <button id="resetAllFilters" class="btn-text">
+                        <i class="fas fa-undo"></i> Сбросить все
+                    </button>
+                </div>
+                
+                <div class="filters-grid">
+                    <!-- Поиск -->
+                    <div class="filter-group search-group">
+                        <label><i class="fas fa-search"></i> Поиск</label>
+                        <div class="search-wrapper">
+                            <input type="text" id="searchInput" placeholder="Введите название события..." autocomplete="off">
+                            <div id="searchAutocomplete" class="autocomplete-list"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Периоды (множественный выбор) -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-clock"></i> Периоды</label>
+                        <div class="checkbox-group" id="periodsFilter"></div>
+                    </div>
+                    
+                    <!-- Регионы (множественный выбор) -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-globe"></i> Регионы</label>
+                        <div class="checkbox-group" id="regionsFilter"></div>
+                    </div>
+                    
+                    <!-- Категории (множественный выбор) -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-tag"></i> Категории</label>
+                        <div class="checkbox-group" id="categoriesFilter"></div>
+                    </div>
+                    
+                    <!-- Эра (радио) -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-sun"></i> Эра</label>
+                        <div class="radio-group" id="eraFilter">
+                            <label class="radio-label">
+                                <input type="radio" name="era" value="all" checked> Все
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="era" value="До н.э."> До н.э.
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="era" value="н.э."> н.э.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Сложность (радио) -->
+                    <div class="filter-group">
+                        <label><i class="fas fa-chart-line"></i> Сложность</label>
+                        <div class="radio-group" id="difficultyFilter">
+                            <label class="radio-label">
+                                <input type="radio" name="difficulty" value="all" checked> Все
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="difficulty" value="легкая"> Легкая
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="difficulty" value="средняя"> Средняя
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="difficulty" value="высокая"> Высокая
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="active-filters" id="activeFilters"></div>
+            
+            <div class="timeline-view-options">
+                <button class="view-btn active" data-view="cards">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="view-btn" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="view-btn" data-view="compact">
+                    <i class="fas fa-table"></i>
+                </button>
+                <span class="results-count" id="resultsCount"></span>
+            </div>
+            
+            <div id="timelineContainer" class="timeline-container cards-view"></div>
+            
+            <div class="pagination" id="pagination">
+                <button class="btn-secondary" id="prevPage" disabled>
+                    <i class="fas fa-chevron-left"></i> Назад
+                </button>
+                <span id="pageInfo">Страница 1 из 1</span>
+                <button class="btn-secondary" id="nextPage" disabled>
+                    Вперед <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Тренировка -->
+        <section id="training" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-dumbbell"></i> Тренировка</h1>
+                <p>Проверьте свои знания в разных форматах</p>
+            </div>
+            
+            <div class="training-setup">
+                <!-- Выбор режима -->
+                <div class="mode-selection">
+                    <h2>Выберите режим:</h2>
+                    <div class="mode-grid">
+                        <div class="mode-card" data-mode="chronology">
+                            <div class="mode-icon">
+                                <i class="fas fa-sort-amount-down"></i>
+                            </div>
+                            <h3>Хронологический порядок</h3>
+                            <p>Расставьте события в правильной последовательности</p>
+                        </div>
+                        
+                        <div class="mode-card" data-mode="dual-test">
+                            <div class="mode-icon">
+                                <i class="fas fa-exchange-alt"></i>
+                            </div>
+                            <h3>Тест на соответствие</h3>
+                            <p>Угадайте событие по году или год по событию</p>
+                        </div>
+                        
+                        <div class="mode-card" data-mode="time-math">
+                            <div class="mode-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <h3>Историческая математика</h3>
+                            <p>Вычислите разницу между событиями</p>
+                        </div>
+                        
+                        <div class="mode-card" data-mode="neighbors">
+                            <div class="mode-icon">
+                                <i class="fas fa-arrows-left-right"></i>
+                            </div>
+                            <h3>Соседи во времени</h3>
+                            <p>Найдите события до и после</p>
+                        </div>
+                        
+                        <div class="mode-card" data-mode="speed-run">
+                            <div class="mode-icon">
+                                <i class="fas fa-stopwatch"></i>
+                            </div>
+                            <h3>Секундомер истории</h3>
+                            <p>5 секунд на ответ, 10 вопросов</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Настройки -->
+                <div class="training-settings-panel">
+                    <h2>Настройки:</h2>
+                    
+                    <div class="settings-grid">
+                        <div class="setting">
+                            <label><i class="fas fa-list-ol"></i> Количество вопросов:</label>
+                            <select id="questionsCount">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting">
+                            <label><i class="fas fa-random"></i> Случайная выборка:</label>
+                            <select id="samplingMethod">
+                                <option value="random">Полностью случайно</option>
+                                <option value="balanced">Сбалансированно по периодам</option>
+                                <option value="weak">Только сложные даты</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="training-filters-summary" id="trainingFiltersSummary">
+                        <!-- Будет показано, какие фильтры активны -->
+                    </div>
+                    
+                    <div class="training-actions">
+                        <button id="startTraining" class="btn-primary btn-large">
+                            <i class="fas fa-play"></i> Начать тренировку
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Контейнер для упражнения -->
+            <div id="trainingExercise" class="training-exercise" style="display: none;"></div>
+        </section>
+
+        <!-- Статистика -->
+        <section id="statistics" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-bar"></i> Статистика</h1>
+                <p>Отслеживайте свой прогресс</p>
+            </div>
+            
+            <div class="stats-summary-cards">
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background: rgba(198, 156, 109, 0.2); color: #c69c6d;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="statCorrect">0</span>
+                        <span class="stat-label">Правильных</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background: rgba(231, 76, 60, 0.2); color: #e74c3c;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="statWrong">0</span>
+                        <span class="stat-label">Неправильных</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background: rgba(52, 152, 219, 0.2); color: #3498db;">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="statAccuracy">0%</span>
+                        <span class="stat-label">Точность</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass">
+                    <div class="stat-icon" style="background: rgba(241, 196, 15, 0.2); color: #f1c40f;">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value" id="statStreak">0</span>
+                        <span class="stat-label">Серия</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <!-- График прогресса по дням -->
+                <div class="stats-card glass">
+                    <h3><i class="fas fa-calendar-week"></i> Прогресс за неделю</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Тепловая карта по векам -->
+                <div class="stats-card glass">
+                    <h3><i class="fas fa-fire"></i> Тепловая карта знаний</h3>
+                    <div id="heatmapContainer" class="heatmap-container"></div>
+                </div>
+                
+                <!-- Прогресс по периодам -->
+                <div class="stats-card glass">
+                    <h3><i class="fas fa-chart-pie"></i> Прогресс по периодам</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="periodsChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Сложные даты -->
+                <div class="stats-card glass">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Сложные даты</h3>
+                    <div id="difficultDates" class="difficult-list"></div>
+                </div>
+            </div>
+            
+            <!-- Достижения -->
+            <div class="achievements-section glass">
+                <h3><i class="fas fa-trophy"></i> Достижения</h3>
+                <div id="achievementsGrid" class="achievements-grid"></div>
+            </div>
+            
+            <div class="stats-footer">
+                <button id="resetProgress" class="btn-secondary">
+                    <i class="fas fa-trash-alt"></i> Сбросить прогресс
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальное окно для деталей -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="js/core/app.js"></script>
+</body>
+</html>
