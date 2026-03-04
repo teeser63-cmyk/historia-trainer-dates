@@ -1747,36 +1747,47 @@ export const DateUtils = {
      * @param {Object} filters - Объект с фильтрами
      * @returns {Array} - Отфильтрованный массив
      */
-  filterDates: (datesArray, filters = {}) => {  // ← ДОБАВЛЕНО = {} 
+ /**
+     * Фильтрация дат по множественным критериям
+     * @param {Array} datesArray - Массив дат
+     * @param {Object} filters - Объект с фильтрами
+     * @returns {Array} - Отфильтрованный массив
+     */
+    filterDates: (datesArray, filters) => {
+        // Если filters не передан или undefined, создаем пустой объект
+        if (!filters) {
+            filters = {};
+        }
+        
         return datesArray.filter(date => {
-            // Поиск по тексту
-            if (filters.search && filters.search.trim() !== '') {
+            // Поиск по тексту - проверяем что filters.search существует и не пустой
+            if (filters.search && typeof filters.search === 'string' && filters.search.trim() !== '') {
                 const searchText = filters.search.toLowerCase();
                 const matches = 
                     (date.event && date.event.toLowerCase().includes(searchText)) ||
                     (date.description && date.description.toLowerCase().includes(searchText)) ||
                     (date.fullDescription && date.fullDescription.toLowerCase().includes(searchText)) ||
-                    (date.tags && date.tags.some(t => t && t.toLowerCase().includes(searchText)));
+                    (date.tags && Array.isArray(date.tags) && date.tags.some(t => t && t.toLowerCase().includes(searchText)));
                 
                 if (!matches) return false;
             }
             
             // Фильтр по периодам (множественный выбор)
-            if (filters.periods && filters.periods.length > 0) {
+            if (filters.periods && Array.isArray(filters.periods) && filters.periods.length > 0) {
                 if (!date.period || !filters.periods.includes(date.period)) return false;
             }
             
             // Фильтр по регионам (множественный выбор)
-            if (filters.regions && filters.regions.length > 0) {
-                const hasRegion = date.region && Array.isArray(date.region) && 
-                    date.region.some(r => filters.regions.includes(r));
+            if (filters.regions && Array.isArray(filters.regions) && filters.regions.length > 0) {
+                if (!date.region || !Array.isArray(date.region)) return false;
+                const hasRegion = date.region.some(r => filters.regions.includes(r));
                 if (!hasRegion) return false;
             }
             
             // Фильтр по категориям (множественный выбор)
-            if (filters.categories && filters.categories.length > 0) {
-                const hasCategory = date.category && Array.isArray(date.category) && 
-                    date.category.some(c => filters.categories.includes(c));
+            if (filters.categories && Array.isArray(filters.categories) && filters.categories.length > 0) {
+                if (!date.category || !Array.isArray(date.category)) return false;
+                const hasCategory = date.category.some(c => filters.categories.includes(c));
                 if (!hasCategory) return false;
             }
             
