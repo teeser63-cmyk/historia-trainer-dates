@@ -516,21 +516,19 @@ function renderTimeMathQuestion(question) {
         <div class="time-math-container">
             <div class="math-events">
                 <div class="math-event">
-                    <div class="event-name">${escapeHtml(question.event)}</div>
-                    <!-- ГОД СКРЫТ -->
+                    <div class="event-name" style="font-size: 1.2rem; font-weight: 500;">${escapeHtml(question.event)}</div>
                 </div>
                 <div class="math-operator">→</div>
                 <div class="math-event">
-                    <div class="event-name">${escapeHtml(otherDate.event)}</div>
-                    <!-- ГОД СКРЫТ -->
+                    <div class="event-name" style="font-size: 1.2rem; font-weight: 500;">${escapeHtml(otherDate.event)}</div>
                 </div>
             </div>
             
-            <div class="math-question">Сколько лет прошло между этими событиями?</div>
+            <div class="math-question" style="font-size: 1.3rem; margin: 30px 0;">Сколько лет прошло между этими событиями?</div>
             
             <div class="math-options">
                 ${options.map(opt => `
-                    <div class="math-option" data-value="${opt}">${opt} ${DateUtils.formatYearDifference(opt).split(' ')[1]}</div>
+                    <div class="math-option" data-value="${opt}" style="font-size: 1.2rem;">${opt} лет</div>
                 `).join('')}
             </div>
         </div>
@@ -595,64 +593,61 @@ function initTimeMathMode(question) {
     });
 }
 
-/**
- * Рендеринг вопроса "Соседи во времени"
- */
-/**
+//**
  * Рендеринг вопроса "Соседи во времени"
  */
 function renderNeighborsQuestion(question) {
+    // Получаем год центрального события для логики
+    const currentYear = DateUtils.yearToNumber(question.year);
+    
     // Находим все даты из того же периода
-    const periodDates = DateUtils.sortByYear(
-        window.appData.dates.filter(d => d.period === question.period && d.id !== question.id)
-    );
+    const periodDates = window.appData.dates.filter(d => d.period === question.period && d.id !== question.id);
     
-    // Берем даты до и после (без годов!)
-    const beforeDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) < DateUtils.yearToNumber(question.year));
-    const afterDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) > DateUtils.yearToNumber(question.year));
+    // Разделяем на те, что ДО и ПОСЛЕ (по году, но годы не показываем пользователю)
+    const beforeDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) < currentYear);
+    const afterDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) > currentYear);
     
-    // Берем по 5 случайных для выбора
-    const beforeOptions = shuffleArray(beforeDates).slice(0, 5);
-    const afterOptions = shuffleArray(afterDates).slice(0, 5);
+    // Берем по 4 случайных для выбора
+    const beforeOptions = shuffleArray(beforeDates).slice(0, 4);
+    const afterOptions = shuffleArray(afterDates).slice(0, 4);
     
     return `
         <div class="neighbors-container">
-            <div class="center-event">
-                <div class="event-name">${escapeHtml(question.event)}</div>
-                <!-- ГОД ЦЕНТРАЛЬНОГО СОБЫТИЯ СКРЫТ -->
+            <div class="center-event" style="padding: 20px; background: rgba(198, 156, 109, 0.1); border-radius: 16px; margin-bottom: 30px;">
+                <div class="event-name" style="font-size: 1.5rem; font-weight: 600; color: var(--accent-primary);">${escapeHtml(question.event)}</div>
             </div>
             
-            <div class="neighbors-question">
-                Выберите событие, которое было <strong>ДО</strong> и <strong>ПОСЛЕ</strong> данного
+            <div class="neighbors-question" style="text-align: center; font-size: 1.2rem; margin-bottom: 30px;">
+                Какие события произошли <strong style="color: var(--accent-secondary);">ДО</strong> и <strong style="color: var(--accent-secondary);">ПОСЛЕ</strong> этого?
             </div>
             
-            <div class="neighbors-grid">
-                <div class="neighbor-column">
-                    <h3>ДО</h3>
-                    <div class="neighbor-options" id="beforeOptions">
+            <div class="neighbors-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="neighbor-column" style="background: rgba(198, 156, 109, 0.05); border-radius: 16px; padding: 20px;">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: var(--accent-secondary);">БЫЛО ДО</h3>
+                    <div class="neighbor-options" id="beforeOptions" style="display: flex; flex-direction: column; gap: 10px;">
                         ${beforeOptions.map(d => `
-                            <div class="neighbor-option" data-id="${d.id}">
-                                ${escapeHtml(d.event)} <!-- ТОЛЬКО НАЗВАНИЕ, БЕЗ ГОДА -->
+                            <div class="neighbor-option" data-id="${d.id}" style="padding: 15px; background: var(--bg-light); border: 2px solid rgba(198, 156, 109, 0.2); border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 1rem;">
+                                ${escapeHtml(d.event)}
                             </div>
                         `).join('')}
-                        ${beforeOptions.length === 0 ? '<p class="no-data">Нет событий до</p>' : ''}
+                        ${beforeOptions.length === 0 ? '<p style="text-align: center; color: var(--text-light);">Нет событий до</p>' : ''}
                     </div>
                 </div>
                 
-                <div class="neighbor-column">
-                    <h3>ПОСЛЕ</h3>
-                    <div class="neighbor-options" id="afterOptions">
+                <div class="neighbor-column" style="background: rgba(198, 156, 109, 0.05); border-radius: 16px; padding: 20px;">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: var(--accent-secondary);">БЫЛО ПОСЛЕ</h3>
+                    <div class="neighbor-options" id="afterOptions" style="display: flex; flex-direction: column; gap: 10px;">
                         ${afterOptions.map(d => `
-                            <div class="neighbor-option" data-id="${d.id}">
-                                ${escapeHtml(d.event)} <!-- ТОЛЬКО НАЗВАНИЕ, БЕЗ ГОДА -->
+                            <div class="neighbor-option" data-id="${d.id}" style="padding: 15px; background: var(--bg-light); border: 2px solid rgba(198, 156, 109, 0.2); border-radius: 12px; cursor: pointer; transition: all 0.3s; text-align: center; font-size: 1rem;">
+                                ${escapeHtml(d.event)}
                             </div>
                         `).join('')}
-                        ${afterOptions.length === 0 ? '<p class="no-data">Нет событий после</p>' : ''}
+                        ${afterOptions.length === 0 ? '<p style="text-align: center; color: var(--text-light);">Нет событий после</p>' : ''}
                     </div>
                 </div>
             </div>
             
-            <button class="btn-primary" id="checkNeighbors" style="margin-top: 20px;">
+            <button class="btn-primary" id="checkNeighbors" style="margin-top: 30px; width: 100%; padding: 15px;">
                 <i class="fas fa-check"></i> Проверить
             </button>
         </div>
