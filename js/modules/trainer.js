@@ -78,11 +78,18 @@ function updateTrainingInfo(dates) {
     const container = document.getElementById('trainingFiltersSummary');
     if (!container) return;
     
-    const questionsCount = parseInt(document.getElementById('questionsCount').value);
-    const samplingMethod = document.getElementById('samplingMethod').value;
+    const questionsCount = parseInt(document.getElementById('questionsCount')?.value || '10');
+    const samplingMethod = document.getElementById('samplingMethod')?.value || 'random';
     
-    // Получаем активные фильтры из глобального состояния
-    const filters = window.currentFilters;
+    // Получаем активные фильтры из глобального состояния с проверкой
+    const filters = window.currentFilters || {
+        search: '',
+        periods: [],
+        regions: [],
+        categories: [],
+        era: 'all',
+        difficulty: 'all'
+    };
     
     // Подсчитываем доступные даты
     const availableDates = DateUtils.filterDates(dates, filters);
