@@ -4,7 +4,7 @@
 
 import { dates, DateUtils, filtersConfig } from '../data/dates.js';
 import { Storage } from './storage.js';
-import { showLoading, showError, debounce, setUrlParams, getUrlParams } from './utils.js';
+import { showLoading, showError, setUrlParams, getUrlParams } from './utils.js';
 import { initTimeline } from '../modules/timeline.js';
 import { initTrainer } from '../modules/trainer.js';
 import { initStatistics } from '../modules/statistics.js';
@@ -22,7 +22,7 @@ window.appData = {
 };
 
 // Текущие фильтры
-let currentFilters = {
+export let currentFilters = {
     search: '',
     periods: [],
     regions: [],
@@ -163,6 +163,3 @@ export function updateFilters(newFilters) {
         difficulty: currentFilters.difficulty !== 'all' ? currentFilters.difficulty : null
     });
 }
-
-// Экспорт для использования в модулях
-export { currentFilters };
