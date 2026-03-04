@@ -543,13 +543,13 @@ function initTimeMathMode(question) {
     const options = document.querySelectorAll('.math-option');
     let answered = false;
     
-    // Получаем второе событие (оно отображается на странице)
-    const eventElements = document.querySelectorAll('.math-event');
-    if (eventElements.length < 2) return;
+    // Получаем второе событие из данных, а не из DOM
+    const otherDate = window.appData.dates
+        .filter(d => d.id !== question.id && d.period === question.period)
+        .sort(() => Math.random() - 0.5)[0] || window.appData.dates.find(d => d.id !== question.id);
     
-    const year2Str = eventElements[1].querySelector('.event-year').textContent.trim();
     const year1 = DateUtils.yearToNumber(question.year);
-    const year2 = DateUtils.yearToNumber(year2Str);
+    const year2 = DateUtils.yearToNumber(otherDate.year);
     const correctDiff = Math.abs(year1 - year2);
     
     options.forEach(opt => {
@@ -566,9 +566,9 @@ function initTimeMathMode(question) {
                 opt.classList.add('correct');
                 handleCorrect(20, {
                     type: 'time-math',
-                    question: `Разница между ${question.year} и ${year2Str}`,
+                    question: `Разница между ${question.event} и ${otherDate.event}`,
                     correct: true,
-                    details: { event1: question, event2: year2Str }
+                    details: { event1: question, event2: otherDate }
                 });
             } else {
                 opt.classList.add('wrong');
@@ -582,20 +582,21 @@ function initTimeMathMode(question) {
                 
                 handleWrong({
                     type: 'time-math',
-                    question: `Разница между ${question.year} и ${year2Str}`,
+                    question: `Разница между ${question.event} и ${otherDate.event}`,
                     correct: false,
                     userAnswer: selectedDiff,
                     correctAnswer: correctDiff,
-                    details: { event1: question, event2: year2Str }
+                    details: { event1: question, event2: otherDate }
                 });
             }
         });
     });
 }
 
-//**
- * Рендеринг вопроса "Соседи во времени"
+/**
+ * Рендеринг режима "Соседи во времени"
  */
+
 function renderNeighborsQuestion(question) {
     // Получаем год центрального события для логики
     const currentYear = DateUtils.yearToNumber(question.year);
@@ -664,6 +665,18 @@ function initNeighborsMode(question) {
     const beforeOptions = document.querySelectorAll('#beforeOptions .neighbor-option');
     const afterOptions = document.querySelectorAll('#afterOptions .neighbor-option');
     
+    // Получаем год центрального события
+    const currentYear = DateUtils.yearToNumber(question.year);
+    
+    // Находим правильные ответы
+    const periodDates = DateUtils.sortByYear(
+        window.appData.dates.filter(d => d.period === question.period)
+    );
+    
+    const currentIndex = periodDates.findIndex(d => d.id === question.id);
+    const correctBefore = currentIndex > 0 ? periodDates[currentIndex - 1]?.id : null;
+    const correctAfter = currentIndex < periodDates.length - 1 ? periodDates[currentIndex + 1]?.id : null;
+    
     beforeOptions.forEach(opt => {
         opt.addEventListener('click', () => {
             beforeOptions.forEach(o => o.classList.remove('selected'));
@@ -686,15 +699,6 @@ function initNeighborsMode(question) {
             return;
         }
         
-        // Находим правильные ответы
-        const periodDates = DateUtils.sortByYear(
-            window.appData.dates.filter(d => d.period === question.period)
-        );
-        
-        const currentIndex = periodDates.findIndex(d => d.id === question.id);
-        const correctBefore = periodDates[currentIndex - 1]?.id;
-        const correctAfter = periodDates[currentIndex + 1]?.id;
-        
         const isBeforeCorrect = parseInt(selectedBefore) === correctBefore;
         const isAfterCorrect = parseInt(selectedAfter) === correctAfter;
         const isCorrect = isBeforeCorrect && isAfterCorrect;
@@ -703,7 +707,7 @@ function initNeighborsMode(question) {
         beforeOptions.forEach(o => {
             if (o.dataset.id == correctBefore) {
                 o.classList.add('correct');
-            } else if (o.dataset.id == selectedBefore) {
+            } else if (o.dataset.id == selectedBefore && !isBeforeCorrect) {
                 o.classList.add('wrong');
             }
         });
@@ -711,7 +715,7 @@ function initNeighborsMode(question) {
         afterOptions.forEach(o => {
             if (o.dataset.id == correctAfter) {
                 o.classList.add('correct');
-            } else if (o.dataset.id == selectedAfter) {
+            } else if (o.dataset.id == selectedAfter && !isAfterCorrect) {
                 o.classList.add('wrong');
             }
         });
@@ -728,11 +732,11 @@ function initNeighborsMode(question) {
             const correctAfterEvent = periodDates.find(d => d.id === correctAfter);
             
             let message = 'Неверно. ';
-            if (!isBeforeCorrect) {
-                message += `До: ${correctBeforeEvent?.year} - ${correctBeforeEvent?.event}. `;
+            if (!isBeforeCorrect && correctBeforeEvent) {
+                message += `До: ${correctBeforeEvent.event}. `;
             }
-            if (!isAfterCorrect) {
-                message += `После: ${correctAfterEvent?.year} - ${correctAfterEvent?.event}`;
+            if (!isAfterCorrect && correctAfterEvent) {
+                message += `После: ${correctAfterEvent.event}`;
             }
             
             handleWrong({
@@ -745,7 +749,6 @@ function initNeighborsMode(question) {
         }
     });
 }
-
 /**
  * Рендеринг вопроса "Секундомер истории"
  */
