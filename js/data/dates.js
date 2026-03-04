@@ -1747,45 +1747,47 @@ export const DateUtils = {
      * @param {Object} filters - Объект с фильтрами
      * @returns {Array} - Отфильтрованный массив
      */
-    filterDates: (datesArray, filters) => {
+  filterDates: (datesArray, filters = {}) => {  // ← ДОБАВЛЕНО = {} 
         return datesArray.filter(date => {
             // Поиск по тексту
-            if (filters.search) {
+            if (filters.search && filters.search.trim() !== '') {
                 const searchText = filters.search.toLowerCase();
                 const matches = 
                     (date.event && date.event.toLowerCase().includes(searchText)) ||
                     (date.description && date.description.toLowerCase().includes(searchText)) ||
                     (date.fullDescription && date.fullDescription.toLowerCase().includes(searchText)) ||
-                    (date.tags && date.tags.some(t => t.toLowerCase().includes(searchText)));
+                    (date.tags && date.tags.some(t => t && t.toLowerCase().includes(searchText)));
                 
                 if (!matches) return false;
             }
             
             // Фильтр по периодам (множественный выбор)
             if (filters.periods && filters.periods.length > 0) {
-                if (!filters.periods.includes(date.period)) return false;
+                if (!date.period || !filters.periods.includes(date.period)) return false;
             }
             
             // Фильтр по регионам (множественный выбор)
             if (filters.regions && filters.regions.length > 0) {
-                const hasRegion = date.region && date.region.some(r => filters.regions.includes(r));
+                const hasRegion = date.region && Array.isArray(date.region) && 
+                    date.region.some(r => filters.regions.includes(r));
                 if (!hasRegion) return false;
             }
             
             // Фильтр по категориям (множественный выбор)
             if (filters.categories && filters.categories.length > 0) {
-                const hasCategory = date.category && date.category.some(c => filters.categories.includes(c));
+                const hasCategory = date.category && Array.isArray(date.category) && 
+                    date.category.some(c => filters.categories.includes(c));
                 if (!hasCategory) return false;
             }
             
             // Фильтр по эре
             if (filters.era && filters.era !== 'all') {
-                if (date.era !== filters.era) return false;
+                if (!date.era || date.era !== filters.era) return false;
             }
             
             // Фильтр по сложности
             if (filters.difficulty && filters.difficulty !== 'all') {
-                if (date.difficulty !== filters.difficulty) return false;
+                if (!date.difficulty || date.difficulty !== filters.difficulty) return false;
             }
             
             return true;
