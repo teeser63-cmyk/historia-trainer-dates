@@ -165,4 +165,4 @@ export function updateFilters(newFilters) {
 }
 
 // Экспорт для использования в модулях
-export { currentFilters, updateFilters };
+export { currentFilters };
