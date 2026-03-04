@@ -516,13 +516,13 @@ function renderTimeMathQuestion(question) {
         <div class="time-math-container">
             <div class="math-events">
                 <div class="math-event">
-                    <div class="event-year">${escapeHtml(question.year)}</div>
                     <div class="event-name">${escapeHtml(question.event)}</div>
+                    <!-- ГОД СКРЫТ -->
                 </div>
                 <div class="math-operator">→</div>
                 <div class="math-event">
-                    <div class="event-year">${escapeHtml(otherDate.year)}</div>
                     <div class="event-name">${escapeHtml(otherDate.event)}</div>
+                    <!-- ГОД СКРЫТ -->
                 </div>
             </div>
             
@@ -536,6 +536,7 @@ function renderTimeMathQuestion(question) {
         </div>
     `;
 }
+
 
 /**
  * Инициализация режима исторической математики
@@ -597,23 +598,28 @@ function initTimeMathMode(question) {
 /**
  * Рендеринг вопроса "Соседи во времени"
  */
+/**
+ * Рендеринг вопроса "Соседи во времени"
+ */
 function renderNeighborsQuestion(question) {
     // Находим все даты из того же периода
     const periodDates = DateUtils.sortByYear(
-        window.appData.dates.filter(d => d.period === question.period)
+        window.appData.dates.filter(d => d.period === question.period && d.id !== question.id)
     );
     
-    const currentIndex = periodDates.findIndex(d => d.id === question.id);
+    // Берем даты до и после (без годов!)
+    const beforeDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) < DateUtils.yearToNumber(question.year));
+    const afterDates = periodDates.filter(d => DateUtils.yearToNumber(d.year) > DateUtils.yearToNumber(question.year));
     
-    // Берем даты до и после
-    const beforeDates = periodDates.slice(Math.max(0, currentIndex - 5), currentIndex);
-    const afterDates = periodDates.slice(currentIndex + 1, currentIndex + 6);
+    // Берем по 5 случайных для выбора
+    const beforeOptions = shuffleArray(beforeDates).slice(0, 5);
+    const afterOptions = shuffleArray(afterDates).slice(0, 5);
     
     return `
         <div class="neighbors-container">
             <div class="center-event">
-                <div class="event-year">${escapeHtml(question.year)}</div>
                 <div class="event-name">${escapeHtml(question.event)}</div>
+                <!-- ГОД ЦЕНТРАЛЬНОГО СОБЫТИЯ СКРЫТ -->
             </div>
             
             <div class="neighbors-question">
@@ -624,24 +630,24 @@ function renderNeighborsQuestion(question) {
                 <div class="neighbor-column">
                     <h3>ДО</h3>
                     <div class="neighbor-options" id="beforeOptions">
-                        ${beforeDates.map(d => `
+                        ${beforeOptions.map(d => `
                             <div class="neighbor-option" data-id="${d.id}">
-                                <strong>${escapeHtml(d.year)}</strong> — ${escapeHtml(d.event)}
+                                ${escapeHtml(d.event)} <!-- ТОЛЬКО НАЗВАНИЕ, БЕЗ ГОДА -->
                             </div>
                         `).join('')}
-                        ${beforeDates.length === 0 ? '<p class="no-data">Нет событий до</p>' : ''}
+                        ${beforeOptions.length === 0 ? '<p class="no-data">Нет событий до</p>' : ''}
                     </div>
                 </div>
                 
                 <div class="neighbor-column">
                     <h3>ПОСЛЕ</h3>
                     <div class="neighbor-options" id="afterOptions">
-                        ${afterDates.map(d => `
+                        ${afterOptions.map(d => `
                             <div class="neighbor-option" data-id="${d.id}">
-                                <strong>${escapeHtml(d.year)}</strong> — ${escapeHtml(d.event)}
+                                ${escapeHtml(d.event)} <!-- ТОЛЬКО НАЗВАНИЕ, БЕЗ ГОДА -->
                             </div>
                         `).join('')}
-                        ${afterDates.length === 0 ? '<p class="no-data">Нет событий после</p>' : ''}
+                        ${afterOptions.length === 0 ? '<p class="no-data">Нет событий после</p>' : ''}
                     </div>
                 </div>
             </div>
